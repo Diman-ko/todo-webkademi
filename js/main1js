@@ -16,28 +16,9 @@ const addTask = (event) => {
     const taskText = taskInput.value
     // console.log(taskText) //  выводит текст из поля ввода
 
-
-    //============================ работаем с данными  localStorage
-    //  описали объект для нашей задачи
-    const newTask =  {
-        id: Date.now(),
-        text: taskText,
-        done: false,
-    };
-
-    //  добавим объект в массив с задачами
-    tasks.push(newTask);
-    // console.log(tasks);
-
-    //  формируем css  класс
-    const cssClass = newTask.done ? 'task-title task-title--done' : 'task-title';
-
-    //============================
-
-
     const taskHTML = `
-         <li id="${newTask.id}" class="list-group-item d-flex justify-content-between task-item">
-            <span class="${cssClass}">${newTask.text}</span>
+         <li class="list-group-item d-flex justify-content-between task-item">
+            <span class="task-title">${taskText}</span>
             <div class="task-item__buttons">
                 <button type="button" data-action="done" class="btn-action">
                      <img src="./img/tick.svg" alt="Done" width="18" height="18">
@@ -47,7 +28,7 @@ const addTask = (event) => {
                 </button>
             </div>
         </li> `
-    // console.log(taskHTML) //  проверка вывода с названием названия с помощью интерполяции  ${newTask.text}
+    // console.log(taskHTML) //  проверка вывода с названием названия с помощью интерполяции  ${taskText}
 
     //  Добавляем задачу на страницу
     tasksList.insertAdjacentHTML('beforeend', taskHTML);
@@ -62,7 +43,7 @@ const addTask = (event) => {
     if (tasksList.children.length > 1) {
         emptyList.classList.add('none');
     }
-
+    saveHTMLLS()
 };
 const deleteTask = (event) => {
     //  куда мы кликнули определяем опять параметром  event
@@ -71,32 +52,6 @@ const deleteTask = (event) => {
 
     const parentNode = event.target.closest('.list-group-item');
     // console.log(parentNode); //  проверка правильной работы  работает правильно, указывает нужный тег
-
-    //============================== localStorage
-        //  Определяем ID задачи
-
-    const id = Number(parentNode.id);
-    // console.log(id) // тест  при нажатии на кнопку delete
-    //  находим индекс и удалим из массива по индексу
-/*
-   const index = tasks.findIndex((task) => task.id === id);
-    /!* const index = tasks.findIndex( (task) => {
-        // console.log(task);
-      /!*  if (task.id === id) {
-            return true;
-            //  можно упростить
-        }*!/
-       return task.id === id;
-    });*!/
-    console.log(index)
-    //  Удаляем задачу из массива
-    tasks.splice(index, 1);
-*/
-
-    // Аналогичный способ с методом filter.  Удаляем задачу через фильтрацию массива и создание нового массива
-    tasks = tasks.filter((task) => task.id !== id);
-    //==============================
-
 
     if (confirm('Вы уверены?')) {
         parentNode.remove() //  удаляет после подтверждения удаления во всплывающем окне
@@ -125,7 +80,7 @@ const deleteTask = (event) => {
         }
 
     }*/
-
+    saveHTMLLS()
 };
 
 const doneTask = (event) => { //  куда мы кликнули определяем опять параметром  event
@@ -145,10 +100,7 @@ const doneTask = (event) => { //  куда мы кликнули определ�
     //   Добавляем родительскому parentNode  всему комплексу li  значение выполнено, окрашивая в зелёный цвет из бутстрапа
     parentNode.classList.toggle('list-group-item-success');
 
-//===================================== Тут localStorage
-    const id = Number(parentNode.id);  //  определяем   id задачи
-    const task = tasks.find((task) => task.id === id);
-    task.done = !task.done
+
 // ======================================================
     /*    if (event.target.dataset.action === 'done') {
         // console.log('done') //  проверка, что выводится только при попадании на нужную кнопку
@@ -165,16 +117,8 @@ const doneTask = (event) => { //  куда мы кликнули определ�
         parentNode.classList.toggle('list-group-item-success')
 
     }*/
-
+    saveHTMLLS()
 };
-
-
-//======= array for localStorage ============
-
-let tasks = [];
-console.log(tasks)
-
-// =====================================
 
 //  Добавляем задачи. Вызов формы  при прослушивании событий
 form.addEventListener('submit', addTask);
@@ -186,6 +130,12 @@ tasksList.addEventListener('click', deleteTask);
 tasksList.addEventListener('click', doneTask);
 
 
-// ======================================== Local storage==============
+// ========================================
 
+// if (localStorage.getItem('tasksHTML')) {
+// tasksList.innerHTML = localStorage.getItem('tasksHTML');
+// }
+// function saveHTMLLS() {
+//     localStorage.setItem('tasksHTML', tasksList.innerHTML)
+// };
 
