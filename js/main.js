@@ -2,6 +2,7 @@
 // находим элемент на странице
 // constants
 
+
 const form = document.querySelector('#form');
 const taskInput = document.querySelector('#taskInput');
 // console.log(taskInput) //<input type="text" className="form-control" id="taskInput" placeholder="Текст задачи" required>
@@ -15,8 +16,6 @@ const addTask = (event) => {
     //  Достаём текст задачи из поля ввода
     const taskText = taskInput.value
     // console.log(taskText) //  выводит текст из поля ввода
-
-
     //============================ работаем с данными  localStorage
     //  описали объект для нашей задачи
     const newTask =  {
@@ -29,7 +28,8 @@ const addTask = (event) => {
     tasks.push(newTask);
     // console.log(tasks);
 
-    //  формируем css  класс
+    renderTask(newTask);
+    /*//  формируем css  класс
     const cssClass = newTask.done ? 'task-title task-title--done' : 'task-title';
 
     //============================
@@ -52,18 +52,20 @@ const addTask = (event) => {
     //  Добавляем задачу на страницу
     tasksList.insertAdjacentHTML('beforeend', taskHTML);
 
-
+*/
     taskInput.value = ''; //  для очистки поля ввода после добавления списка дел, присваиваем ему пустую строку
 
     // оставляем фокус на поле ввода  input
     taskInput.focus(); //  теперь после очистки поля фокус будет перемещаться на поле ввода  input
 
     //  скрывает emptyList, сначала проверяем нет ли задач, если есть скрываем
-    if (tasksList.children.length > 1) {
+  /*  if (tasksList.children.length > 1) {
         emptyList.classList.add('none');
-    }
-
+    }*/
+    saveToLocalStorage()
+    checkEmptyList()
 };
+
 const deleteTask = (event) => {
     //  куда мы кликнули определяем опять параметром  event
     // Проверяем, что клик был НЕ по кнопке delete
@@ -102,9 +104,9 @@ const deleteTask = (event) => {
         parentNode.remove() //  удаляет после подтверждения удаления во всплывающем окне
 
         //  проверяем есть ли в списке задач первый элемент с надписью "Список дел пуст"
-        if (tasksList.children.length === 1) {
+      /*  if (tasksList.children.length === 1) {
             emptyList.classList.remove('none'); // удаляем класс
-        }
+        }*/
     }
 
 
@@ -125,7 +127,8 @@ const deleteTask = (event) => {
         }
 
     }*/
-
+    saveToLocalStorage()
+    checkEmptyList()
 };
 
 const doneTask = (event) => { //  куда мы кликнули определяем опять параметром  event
@@ -140,10 +143,6 @@ const doneTask = (event) => { //  куда мы кликнули определ�
 
     // Добавляем этому span нужный класс
     taskTitle.classList.toggle('task-title--done');
-
-    // ======================
-    //   Добавляем родительскому parentNode  всему комплексу li  значение выполнено, окрашивая в зелёный цвет из бутстрапа
-    parentNode.classList.toggle('list-group-item-success');
 
 //===================================== Тут localStorage
     const id = Number(parentNode.id);  //  определяем   id задачи
@@ -165,14 +164,24 @@ const doneTask = (event) => { //  куда мы кликнули определ�
         parentNode.classList.toggle('list-group-item-success')
 
     }*/
-
+    saveToLocalStorage()
+    checkEmptyList()
 };
 
 
 //======= array for localStorage ============
 
 let tasks = [];
-console.log(tasks)
+// console.log(tasks)
+if (localStorage.getItem('tasks')) {
+// console.log(JSON.parse(localStorage.getItem('tasks')));
+
+    tasks = JSON.parse(localStorage.getItem('tasks'));
+    tasks.forEach((task) => renderTask(task));
+}
+
+
+
 
 // =====================================
 
@@ -186,6 +195,53 @@ tasksList.addEventListener('click', deleteTask);
 tasksList.addEventListener('click', doneTask);
 
 
+// ======================================== добавление и удаление записипервого li элемента "Список пуст"==============
+
+
+const checkEmptyList = () => {
+    // console.log(tasks.length)
+    if (tasks.length === 0) {
+        const emptyListHTML = `
+        <li id="emptyList" class="list-group-item empty-list">
+            <img src="./img/leaf.svg" alt="Empty" width="48" class="mt-3">
+            <div class="empty-list__title">Список дел пуст</div>
+        </li>`;
+        tasksList.insertAdjacentHTML('afterbegin', emptyListHTML);
+    }
+
+    if (tasks.length > 0) {
+        const emptyListEl =  document.querySelector('#emptyList');
+        emptyListEl ? emptyListEl.remove() : null;
+    }
+};
+
+checkEmptyList() // записываем его в конце и в addTask, deleteTask, done Task
+
+
+
 // ======================================== Local storage==============
 
+function saveToLocalStorage() { // записываем saveToLocalStorage()  в конце и в addTask, deleteTask, done Task
+    localStorage.setItem('tasks', JSON.stringify(tasks))
+}
 
+
+function renderTask(task) {
+    const cssClass = task.done ? 'task-title task-title--done' : 'task-title';
+    const taskHTML = `
+         <li id="${task.id}" class="list-group-item d-flex justify-content-between task-item">
+            <span class="${cssClass}">${task.text}</span>
+            <div class="task-item__buttons">
+                <button type="button" data-action="done" class="btn-action">
+                     <img src="./img/tick.svg" alt="Done" width="18" height="18">
+                 </button>
+                <button type="button" data-action="delete" class="btn-action">
+                    <img src="./img/cross.svg" alt="Done" width="18" height="18">
+                </button>
+            </div>
+        </li> `
+    // console.log(taskHTML) //  проверка вывода с названием названия с помощью интерполяции  ${newTask.text}
+
+    //  Добавляем задачу на страницу
+    tasksList.insertAdjacentHTML('beforeend', taskHTML);
+};
